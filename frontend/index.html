@@ -1,76 +1,59 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Video AI Ops Demo</title>
-  </head>
-  <body>
-    <h2>Video AI Ops Demo Player</h2>
+<script>
+  let bufferStartTime = null;
 
-    <video id="player" width="720" controls>
-      <source
-        src="https://d20fd14e7wktwi.cloudfront.net/IMG_7185.MOV"
-        type="video/quicktime"
-      />
-      Your browser does not support the video tag.
-    </video>
+  const video = document.getElementById("player");
+  const logBox = document.getElementById("log");
+  const API_URL =
+    "https://dunwbzjdh7.execute-api.us-east-1.amazonaws.com/events";
 
-    <pre id="log" style="background:#111;color:#0f0;padding:12px;"></pre>
+  function logEvent(name, extra = {}) {
+    const evt = {
+      event: name,
+      ts: new Date().toISOString(),
+      currentTime: Number(video.currentTime.toFixed(2)),
+      duration: isFinite(video.duration) ? Number(video.duration.toFixed(2)) : null,
+      paused: video.paused,
+      ...extra,
+    };
 
-    <script>
-      let bufferStartTime = null;
+    console.log(evt);
 
-      const video = document.getElementById("player");
-      const logBox = document.getElementById("log");
+    fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(evt),
+    }).catch(() => {});
 
-      function logEvent(name, extra = {}) {
-        const evt = {
-          event: name,
-          ts: new Date().toISOString(),
-          currentTime: Number(video.currentTime.toFixed(2)),
-          duration: isFinite(video.duration)
-            ? Number(video.duration.toFixed(2))
-            : null,
-          paused: video.paused,
-          ...extra,
-        };
+    logBox.textContent = JSON.stringify(evt, null, 2) + "\n" + logBox.textContent;
+  }
 
-        console.log(evt);
-        logBox.textContent =
-          JSON.stringify(evt, null, 2) + "\n" + logBox.textContent;
-      }
+  ["play", "pause", "seeking", "seeked", "ended"].forEach((e) => {
+    video.addEventListener(e, () => logEvent(e));
+  });
 
-      ["play", "pause", "seeking", "seeked", "ended"].forEach((e) => {
-        video.addEventListener(e, () => logEvent(e));
-      });
+  // Buffer start
+  video.addEventListener("waiting", () => {
+    bufferStartTime = performance.now();
+    logEvent("buffer_start");
+  });
 
-      // Buffer start
-      video.addEventListener("waiting", () => {
-        bufferStartTime = performance.now();
-        logEvent("buffer_start");
-      });
+  // Buffer end (when playback resumes)
+  video.addEventListener("playing", () => {
+    if (bufferStartTime !== null) {
+      const bufferMs = Math.round(performance.now() - bufferStartTime);
+      logEvent("buffer_end", { bufferMs });
+      bufferStartTime = null;
+    } else {
+      logEvent("playing");
+    }
+  });
 
-      // Buffer end (when playback resumes)
-      video.addEventListener("playing", () => {
-        if (bufferStartTime !== null) {
-          const bufferMs = Math.round(
-            performance.now() - bufferStartTime
-          );
-          logEvent("buffer_end", { bufferMs });
-          bufferStartTime = null;
-        } else {
-          logEvent("playing");
-        }
-      });
+  video.addEventListener("error", () => {
+    const err = video.error
+      ? { code: video.error.code, message: video.error.message }
+      : {};
+    logEvent("error", err);
+  });
 
-      video.addEventListener("error", () => {
-        const err = video.error
-          ? { code: video.error.code, message: video.error.message }
-          : {};
-        logEvent("error", err);
-      });
-
-      logEvent("page_loaded");
-    </script>
-  </body>
-</html>
+  logEvent("page_loaded");
+</script>
