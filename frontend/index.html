@@ -18,6 +18,8 @@
     <pre id="log" style="background:#111;color:#0f0;padding:12px;"></pre>
 
     <script>
+      let bufferStartTime = null;
+
       const video = document.getElementById("player");
       const logBox = document.getElementById("log");
 
@@ -32,13 +34,34 @@
           paused: video.paused,
           ...extra,
         };
+
         console.log(evt);
         logBox.textContent =
           JSON.stringify(evt, null, 2) + "\n" + logBox.textContent;
       }
 
-      ["play", "pause", "seeking", "seeked", "waiting", "playing", "ended"]
-        .forEach(e => video.addEventListener(e, () => logEvent(e)));
+      ["play", "pause", "seeking", "seeked", "ended"].forEach((e) => {
+        video.addEventListener(e, () => logEvent(e));
+      });
+
+      // Buffer start
+      video.addEventListener("waiting", () => {
+        bufferStartTime = performance.now();
+        logEvent("buffer_start");
+      });
+
+      // Buffer end (when playback resumes)
+      video.addEventListener("playing", () => {
+        if (bufferStartTime !== null) {
+          const bufferMs = Math.round(
+            performance.now() - bufferStartTime
+          );
+          logEvent("buffer_end", { bufferMs });
+          bufferStartTime = null;
+        } else {
+          logEvent("playing");
+        }
+      });
 
       video.addEventListener("error", () => {
         const err = video.error
