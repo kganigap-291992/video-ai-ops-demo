@@ -1,59 +1,81 @@
-<script>
-  let bufferStartTime = null;
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Video AI Ops Demo</title>
+  </head>
+  <body>
+    <h2>Video AI Ops Demo Player</h2>
 
-  const video = document.getElementById("player");
-  const logBox = document.getElementById("log");
-  const API_URL =
-    "https://dunwbzjdh7.execute-api.us-east-1.amazonaws.com/events";
+    <video id="player" width="720" controls>
+      <source
+        src="https://d20fd14e7wktwi.cloudfront.net/IMG_7185.MOV"
+        type="video/quicktime"
+      />
+      Your browser does not support the video tag.
+    </video>
 
-  function logEvent(name, extra = {}) {
-    const evt = {
-      event: name,
-      ts: new Date().toISOString(),
-      currentTime: Number(video.currentTime.toFixed(2)),
-      duration: isFinite(video.duration) ? Number(video.duration.toFixed(2)) : null,
-      paused: video.paused,
-      ...extra,
-    };
+    <pre id="log" style="background:#111;color:#0f0;padding:12px;"></pre>
 
-    console.log(evt);
+    <script>
+      let bufferStartTime = null;
 
-    fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(evt),
-    }).catch(() => {});
+      const video = document.getElementById("player");
+      const logBox = document.getElementById("log");
+      const API_URL =
+        "https://dunwbzjdh7.execute-api.us-east-1.amazonaws.com/events";
 
-    logBox.textContent = JSON.stringify(evt, null, 2) + "\n" + logBox.textContent;
-  }
+      function logEvent(name, extra = {}) {
+        const evt = {
+          event: name,
+          ts: new Date().toISOString(),
+          currentTime: Number(video.currentTime.toFixed(2)),
+          duration: isFinite(video.duration)
+            ? Number(video.duration.toFixed(2))
+            : null,
+          paused: video.paused,
+          ...extra,
+        };
 
-  ["play", "pause", "seeking", "seeked", "ended"].forEach((e) => {
-    video.addEventListener(e, () => logEvent(e));
-  });
+        console.log(evt);
 
-  // Buffer start
-  video.addEventListener("waiting", () => {
-    bufferStartTime = performance.now();
-    logEvent("buffer_start");
-  });
+        fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(evt),
+        }).catch(() => {});
 
-  // Buffer end (when playback resumes)
-  video.addEventListener("playing", () => {
-    if (bufferStartTime !== null) {
-      const bufferMs = Math.round(performance.now() - bufferStartTime);
-      logEvent("buffer_end", { bufferMs });
-      bufferStartTime = null;
-    } else {
-      logEvent("playing");
-    }
-  });
+        logBox.textContent =
+          JSON.stringify(evt, null, 2) + "\n" + logBox.textContent;
+      }
 
-  video.addEventListener("error", () => {
-    const err = video.error
-      ? { code: video.error.code, message: video.error.message }
-      : {};
-    logEvent("error", err);
-  });
+      ["play", "pause", "seeking", "seeked", "ended"].forEach((e) => {
+        video.addEventListener(e, () => logEvent(e));
+      });
 
-  logEvent("page_loaded");
-</script>
+      video.addEventListener("waiting", () => {
+        bufferStartTime = performance.now();
+        logEvent("buffer_start");
+      });
+
+      video.addEventListener("playing", () => {
+        if (bufferStartTime !== null) {
+          const bufferMs = Math.round(performance.now() - bufferStartTime);
+          logEvent("buffer_end", { bufferMs });
+          bufferStartTime = null;
+        } else {
+          logEvent("playing");
+        }
+      });
+
+      video.addEventListener("error", () => {
+        const err = video.error
+          ? { code: video.error.code, message: video.error.message }
+          : {};
+        logEvent("error", err);
+      });
+
+      logEvent("page_loaded");
+    </script>
+  </body>
+</html>
