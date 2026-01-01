@@ -38,6 +38,14 @@ Browser (HTML5 Video Player)
   - writes each event as a JSON object to S3
 - S3 bucket used as durable telemetry storage
 
+## Security & Hardening
+
+- Added required `x-demo-token` validation in the telemetry ingestion Lambda.
+- Lambda returns `401 Unauthorized` when the token is missing or invalid.
+- Token value is stored securely as a Lambda environment variable.
+- Enabled API Gateway throttling on the `$default` stage using rate and burst limits.
+- Verified protection by running burst tests that returned non-200 responses (503/429) under load.
+
 ---
 
 ## Example Telemetry Event
