@@ -17,8 +17,8 @@ MLOps / AIOps roles by building a real-world system from scratch.
 
 ## Current Status
 - [x] GitHub repository created
-- [ ] Video uploaded to S3
-- [ ] CloudFront distribution created
-- [ ] Video playback working
-- [ ] Metrics ingestion
+- [x] Video uploaded to S3
+- [x] CloudFront distribution created
+- [x] Video playback working
+- [x] Metrics ingestion
 - [ ] AI anomaly detection
