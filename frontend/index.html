@@ -74,6 +74,15 @@
         }
       });
 
+      video.addEventListener("stalled", () => {
+        if (!isBuffering) {
+          isBuffering = true;
+          bufferStartTime = performance.now();
+          logEvent("buffer_start", { reason: "stalled" });
+        }
+      });
+
+
       video.addEventListener("playing", () => {
         if (isBuffering && bufferStartTime !== null) {
           const bufferMs = Math.round(performance.now() - bufferStartTime);
