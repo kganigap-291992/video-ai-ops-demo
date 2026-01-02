@@ -66,3 +66,31 @@ Flag anomaly when:
 - Instrument browser to emit buffer_start / buffer_end events with sessionId
 - Implement 5-min aggregation job (EventBridge -> Lambda)
 - Store aggregated metrics for dashboards and detection
+
+## Validation with Real Browser Data (Safari)
+
+- Deployed updated player to S3 and invalidated CloudFront cache
+- Verified session-scoped telemetry using `sessionId`
+- Captured real buffering signals in Safari using `stalled` and `waiting` events
+- Observed buffering behavior under constrained network conditions
+- Measured buffering duration using `performance.now()`
+
+### Sample Buffering Event Observed
+- `buffer_start` triggered due to stalled playback
+- `buffer_end` captured after playback resumed
+- Buffer duration observed: ~67 seconds
+- Playback time at stall: ~3.4 seconds
+
+### QoE Calculation from Real Session
+buffer_duration_s = 66.97
+play_duration_s = 3.4
+rebuffer_ratio = 19.69
+
+
+This represents severe QoE degradation and validates the anomaly detection approach.
+
+### Key Learnings
+- Safari often emits `stalled` instead of `waiting` during buffering
+- Buffering may not resolve until playback resumes (`playing` event)
+- Even a single bad session can significantly impact aggregated QoE metrics
+- Real telemetry behaves differently than synthetic assumptions
