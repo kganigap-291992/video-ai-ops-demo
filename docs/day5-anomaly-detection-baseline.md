@@ -57,6 +57,8 @@ Flag anomaly when:
 - total_sessions >= 20
 - avg_rebuffer_ratio >= 0.05 (5%)
 
+Ref: https://medium.com/@akashsri306/detecting-anomalies-with-z-scores-a-practical-approach-2f9a0f27458d
+
 ## Why This Approach
 - Works with small datasets
 - Explainable and debuggable
