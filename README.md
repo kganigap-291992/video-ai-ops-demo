@@ -45,4 +45,16 @@ Key constraints and design decisions:
 - ML components are **designed but not deployed** to avoid unnecessary training and inference costs
 - Batch-based analysis is preferred over real-time pipelines
 
-The goal of the project is to **demonstrate end-to-end Video AIOps concepts and architecture**, not to operate at production scale.
+The goal of the project is to **demonstrate end-to-end Video AIOps concepts and architecture**, not to operate at production scale. 
+
+## Project Status
+
+This project is currently in a **paused state** to prevent unnecessary AWS costs and exposure.
+
+- Telemetry ingestion is disabled via `x-demo-token` rotation
+- API Gateway throttling is set to zero to block public ingestion
+- Public infrastructure (CloudFront, S3, Lambda) remains intact
+- Collected telemetry data is preserved for analysis and future use
+- The system can be re-enabled quickly if needed
+
+This pause reflects intentional cost, security, and lifecycle management rather than inactivity.
