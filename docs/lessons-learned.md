@@ -83,3 +83,11 @@ This document captures all the real issues encountered during development and th
 - Public endpoints are common, but must be protected with layered controls
 - IAM roles prevent credential exposure even when APIs are public
 - Documenting failures improves system understanding and future design decisions
+
+### Day 7 – Telemetry Analysis & AIOps Foundations
+
+- Raw client telemetry becomes meaningful only after **session-level aggregation** (startup time, buffering duration, buffer count).
+- Severe playback anomalies (e.g., startup > 20s, buffering > 60s) were identified using Athena SQL and matched real observed user experience.
+- Athena is well-suited for early-stage AIOps analysis when data volume is intentionally small and queries are scoped carefully.
+- IAM misconfigurations can surface as confusing console behavior (e.g., catalog visibility) even when queries are executable.
+- Fully qualifying Athena queries with catalog and database names is a reliable workaround for catalog UI limitations.
