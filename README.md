@@ -21,4 +21,4 @@ MLOps / AIOps roles by building a real-world system from scratch.
 - [x] CloudFront distribution created
 - [x] Video playback working
 - [x] Metrics ingestion
-- [ ] AI anomaly detection
+- [x] AI anomaly detection
